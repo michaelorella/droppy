@@ -1,0 +1,9 @@
+name: contact_angles
+dependencies:
+  - numpy
+  - scipy
+  - scikit-image
+  - imageio
+  - matplotlib
+  - pip:
+    - imageio-ffmpeg
