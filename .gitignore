@@ -1,0 +1,15 @@
+# Data file outputs during testing
+*.csv
+
+# Notebooks used for debugging
+*.ipynb
+*.ipynb_checkpoints
+
+# Test coverage files
+.coverage
+
+# Intermediate build files
+/build/
+/dist/
+/*.egg-info
+*.pyc

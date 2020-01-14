@@ -6,25 +6,40 @@ A python script that follows a simple logical progression to reliably measure co
 
 ## Installation
 
-The analysis script can be installed by cloning the repository into your desired working directory. 
+The analysis script can be installed by cloning the repository into your desired working directory or via the following:
+
+```
+$ pip install contactangles
+```
+
+With the `pip` installation, the main script can be run from the command line by calling `analysis`; otherwise it must be run from within a Python instance (see Use section below).
 
 ### Dependencies
 
-The following packages must already be installed for your Python installation:
+The following packages must already be installed in your Python environment to contribute to the development of this project:
 * numpy
 * scipy
 * scikit-image
 * imageio
 * matplotlib
-* imageio-ffmpeg (must be pip-installed)
+* setuptools
+* wheel
+* twine
+* pytest
+* pip:
+    * imageio-ffmpeg
+    * pytest-subtests
+    * pytest-cov
 
 ## Use
 
-The script can be run from the command line with several arguments that modify the behavior of the tangent fitting. 
+Depending on the installation choice, the script can either be run from the command line:
 
 ```
-$ python analysis.py 'your_filename_here.(avi|png|jpg)' -ss 10
+$ analysis path/to/files/of/interest
 ```
+
+If you have installed as a developer, you can use the script by calling the `main()` function from the file `analysis.py`
 
 ### Parameter Definitions
 
@@ -32,12 +47,11 @@ The relevant threshold parameters that define where the tangent lines, baseline,
 
 ![Threshold example image](./images/ThresholdDrawings.svg)
 
-These parameters can be accessed through the flags `--baselineThreshold`, `--circleThreshold`, and `--linThreshold` respectively. Additional flags can be set including:
+These parameters can be accessed through the flags `--baselineThreshold`, `--circleThreshold`, and `--linThreshold` respectively. Additional flags can be set and can be shown from the help accessed by
 
-`--baselineOrder` : The order of the polynomial that is used to fit the baseline \
-`--startSeconds` : The amount of time (in seconds) that is used to "burn in" the video file before consistent drops are reached \
-`--times` : How frequently (in seconds) the frames should be analyzed \
-`-s` : The initial filter value that should be used for the edge-detection algorithm
+```
+$ analysis --help
+```
 
 ## Credits
 
