@@ -10,8 +10,13 @@ import matplotlib.widgets as widgets
 
 import numpy as np
 
+import numba
+
 import scipy as scipy
 import scipy.optimize as opt
+from scipy.spatial import distance
+from scipy.integrate import solve_ivp
+from scipy.optimize import dual_annealing, minimize
 
 import sys
 
@@ -232,10 +237,10 @@ def generate_vectors(linear_points, limits, ε, a, tolerance=None):
 
 
 def output_text(time, φ, baseline_width, volume):
-    print(f'At time {time : 6.3f}: \t\t'
-          f' Contact angle left (deg): {ϕ[L] : 6.3f} \t\t'
-          f' Contact angle right (deg): {ϕ[R] : 6.3f} \t\t'
-          f' Contact angle average (deg): {(ϕ[L]+ϕ[R])/2 : 6.3f} \t\t'
+    print(f'At time {time : 6.3f}: \t'
+          f' Contact angle left (deg): {ϕ[L] : 6.3f} \t'
+          f' Contact angle right (deg): {ϕ[R] : 6.3f} \t'
+          f' Contact angle average (deg): {(ϕ[L]+ϕ[R])/2 : 6.3f} \t'
           f' Baseline width (px): {baseline_width : 4.1f}')
 
 
@@ -390,7 +395,8 @@ def parse_cmdline(argv=None):
                         action='store', dest='video_start_time',
                         help='Amount of time in which video should be burned '
                              'in before beginning analysis')
-    parser.add_argument('--fitType', choices=['linear', 'circular'],
+    parser.add_argument('--fitType', choices=['linear', 'circular',
+                                              'bashforth-adams'],
                         default='linear', type=str, action='store',
                         dest='fit_type',
                         help='Type of fit to perform to identify the contact '
@@ -413,6 +419,49 @@ def parse_cmdline(argv=None):
     args = parser.parse_args(argv)
 
     return args
+
+@numba.jit(nopython=True)
+def bashforth_adams(t, y, a, b):
+    x, z = y
+    t = t / 180 * np.pi
+    dxdphi = b*x*np.cos(t) / (a**2 * b * x * z + 2 * x - b * np.sin(t))
+    dzdphi = b*x*np.sin(t) / (a**2 * b * x * z + 2 * x - b * np.sin(t))
+    return dxdphi, dzdphi
+
+def sim_bashforth_adams(h, a=1, b=1):
+
+    height = lambda t, y, a, b: y[1] - h
+    height.terminal = True
+    sol_l = solve_ivp(bashforth_adams, (0, -180) , (1e-5, 0), args=(a, b, ),
+                      method='BDF',
+                      t_eval=np.linspace(0, -180, num=500), events=height)
+    sol_r = solve_ivp(bashforth_adams, (0, 180) , (1e-5, 0), args=(a, b, ),
+                      method='BDF',
+                      t_eval=np.linspace(0, 180, num=500), events=height)
+
+    angles = np.hstack((sol_l.t, sol_r.t[::-1])).T
+    pred = np.vstack([np.hstack((sol_l.y[0],sol_r.y[0][::-1])),
+                      np.hstack((sol_l.y[1],sol_r.y[1][::-1]))]).T
+
+    return angles, pred
+
+def fit_bashforth_adams(data, a=0.1, b=3):
+
+    def calc_error(h, params):
+        a, b = params
+
+        _, pred = sim_bashforth_adams(h, a=a, b=b)
+
+        dist = distance.cdist(data, pred)
+        return np.linalg.norm(np.min(dist, axis=1))
+
+    x_0 = (a, b)
+    bounds = [[0,10], [0, 100]]
+
+    h = np.max(data[:, 1])
+    opt = minimize(lambda x: calc_error(h, x), x_0, method='Nelder-Mead',
+                   options={'disp':False})
+    return opt
 
 class CannyPlugin(plugins.OverlayPlugin):
 
@@ -438,7 +487,7 @@ class CannyPlugin(plugins.OverlayPlugin):
         image = image_viewer.image
         imin, imax = skimage.dtype_limits(image, clip_negative=False)
         itype = 'float' if np.issubdtype(image.dtype, np.floating) else 'int'
-        self.add_widget(Slider('sigma', 0, 10, update_on='release'))
+        self.add_widget(Slider('sigma', 0, 2, update_on='release'))
         self.add_widget(Slider('low_threshold', imin, imax, value_type=itype,
                         update_on='release'))
         self.add_widget(Slider('high_threshold', imin, imax, value_type=itype,

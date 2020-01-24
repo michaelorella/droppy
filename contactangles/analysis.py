@@ -1,4 +1,8 @@
 import sys
+
+# if __name__ == '__main__':
+#     sys.path = [''] + sys.path
+
 import os
 
 import matplotlib.pyplot as plt
@@ -24,7 +28,9 @@ from contactangles.imageanalysis import (parse_cmdline,
                                          sigma_setter,
                                          fit_circle,
                                          generate_circle_vectors,
-                                         find_intersection)
+                                         find_intersection,
+                                         fit_bashforth_adams,
+                                         sim_bashforth_adams)
 
 from contactangles.movie_handling import (extract_grayscale_frames,
                                           output_plots,
@@ -46,6 +52,10 @@ def main(argv=None):
     tolerance = args.tolerance
     fit_type = args.fit_type
     lim = args.lim
+
+    if not os.path.exists(args.path):
+        raise FileNotFoundError(f'Couldn\'t find {args.path}, '
+                                'make sure you\'ve spelled it right')
 
     if os.path.isfile(args.path):
         files = [args.path]
@@ -93,6 +103,7 @@ def main(argv=None):
         # the videos
         plt.figure()
         scatter_axis = plt.axes()
+        scatter_axis.invert_yaxis()
 
         plt.figure(figsize=(5, 5))
         image_axes = plt.axes()
@@ -130,7 +141,6 @@ def main(argv=None):
                 continue
 
             scatter_axis.scatter(circle[:, 0], circle[:, 1])
-            scatter_axis.invert_yaxis()
 
             # Plot the current image
             image_axes.clear()
@@ -184,7 +194,7 @@ def main(argv=None):
                 volume = np.NaN
                 # TODO:// Add the actual volume calculation here!
 
-            elif fit_type == 'circular':
+            elif fit_type == 'circular' or fit_type == 'bashforth-adams':
                 # Get the cropped image width
                 width = bounds[1] - bounds[0]
 
@@ -216,17 +226,48 @@ def main(argv=None):
                 v1, v2 = generate_circle_vectors([x_t, y_t])
 
                 ϕ = {i: calculate_angle(v1, v2) for i in [L, R]}
-                baseline_width = 2 * x_t
+                if fit_type == 'circular':
+                    baseline_width = 2 * x_t
 
-                volume = (2/3 * np.pi * r ** 3
-                          + np.pi * r ** 2 * y_t
-                          - np.pi * y_t ** 3 / 3)
+                    volume = (2/3 * np.pi * r ** 3
+                              + np.pi * r ** 2 * y_t
+                              - np.pi * y_t ** 3 / 3)
 
-                # Fitted circle
-                theta = np.linspace(0, 2 * np.pi, num=100)
-                x = z[0] + r * np.cos(theta)
-                y = z[1] + r * np.sin(theta)
-                image_axes.plot(x, y, 'r-')
+                    # Fitted circle
+                    theta = np.linspace(0, 2 * np.pi, num=100)
+                    x = z[0] + r * np.cos(theta)
+                    y = z[1] + r * np.sin(theta)
+                    image_axes.plot(x, y, 'r-')
+                else:
+                    # Get points within 10 pixels of the circle edge
+                    points = np.array([(x, y) for x, y in circle
+                                       if (x - z[0]) ** 2 + (y - z[1]) ** 2
+                                       >= (r-10) ** 2])
+
+                    points[:, 1] = - np.array([y - np.dot(a, np.power(y,
+                                     range(len(a)))) for y in points[:, 1]])
+                    center = (np.max(points[:, 0]) + np.min(points[:, 0]))/2
+                    points[:, 0] = points[:, 0] - center
+                    h = np.max(points[:, 1])
+                    points = np.vstack([points[:, 0],
+                                        h - points[:, 1]]).T
+
+                    cap_length, curv = fit_bashforth_adams(points).x
+                    θs, pred = sim_bashforth_adams(h, cap_length, curv)
+                    ϕ[L] = -np.min(θs)
+                    ϕ[R] = np.max(θs)
+
+                    θ = (ϕ[L] + ϕ[R])/2
+
+                    R0 = pred[np.argmax(θs),0] - pred[np.argmin(θs),0]
+                    baseline_width = R0
+
+                    P = 2*cap_length/ curv
+                    volume = np.pi * R0 * (R0 * h + R0 * P - 2 * np.sin(θ))
+                    x = pred[:, 0] + center
+                    y = np.array([np.dot(a, np.power(y, range(len(a)))) + y
+                                  for y in (pred[:, 1] - h)])
+                    image_axes.plot(x, y, 'r-')
 
             else:
                 raise Exception('Unknown fit type! Try another.')
