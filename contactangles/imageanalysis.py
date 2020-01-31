@@ -60,6 +60,60 @@ def get_crop(image):
     plt.ion()
     return np.array(np.round(bounds), dtype=int)
 
+def auto_crop(image, pad=50, σ=1, low=None, high=None):
+    print('Performing auto-cropping, please wait...')
+    edges = extract_edges(image, σ=σ, low=low, high=high)
+    x = edges[:, 0]
+    y = edges[:, 1]
+
+    binwidth = 1
+    lim = np.ceil(np.abs([x, y]).max() / binwidth) * binwidth
+    bins = np.arange(0, lim + 2*binwidth, binwidth)
+
+    hist, bin_edges = np.histogram(y, bins=bins)
+    zero_locations = [b for b, c in zip(bin_edges, hist) if c == 0]
+    tops = [b for b, δ in zip(zero_locations, np.diff(zero_locations))
+            if δ > 1]
+    zero_loc, top, *_ = tops
+    bottom = zero_locations[zero_locations.index(top) + 1] + pad
+    top -= pad
+
+    temp_x = np.array([x_pt for x_pt, y_pt in zip(x, y)
+                       if top <= y_pt <= bottom])
+    hist, bin_edges = np.histogram(temp_x, bins=bins)
+    temp_x = np.array([x_pt for x_pt in temp_x
+                       if hist[np.where(bin_edges==x_pt)] > 1])
+    nonzeros = np.array([b for c, b in zip(*np.histogram(temp_x, bins=bins))
+                         if c != 0])
+    gaps = np.where(np.diff(nonzeros) > pad)[0]
+
+    if gaps.size != 0:
+        #Have some large gap
+        x_bar = nonzeros.mean()
+        left_sides = nonzeros[gaps]
+        if (left_sides < x_bar).any():
+            left = nonzeros[np.where(nonzeros == left_sides
+                                     [np.where(left_sides
+                                               < x_bar)][-1])[0][0] + 1]
+        else:
+            left = nonzeros[0]
+
+        left -= pad
+
+        if (left_sides > x_bar).any():
+            right = nonzeros[np.where(nonzeros == left_sides
+                                     [np.where(left_sides
+                                               > x_bar)][0])[0][0]]
+        else:
+            right = nonzeros[-1]
+
+        right += pad
+    else:
+        left, right = nonzeros[0] - pad, nonzeros[-1] + pad
+
+    bounds = [left, right, top, bottom]
+    return np.array(np.round(bounds), dtype=int)
+
 
 def calculate_angle(v1, v2):
     '''
@@ -113,6 +167,9 @@ def fit_line(points, order=1):
     Returns the set of coefficients of the form y = Σ a[i]*x**i for i = 0 ..
     order using np.linalg
     '''
+    if len(points.shape) != 2:
+        raise(IndexError('There are not enough points to fit a line, please check this video'))
+
     X = np.ones((points.shape[0], order + 1))
     x = points[:, 0]
     for col in range(order + 1):
@@ -415,6 +472,17 @@ def parse_cmdline(argv=None):
                         dest='block_at_end',
                         help='Flag to keep plots at the end of the script '
                              'open for user review')
+    parser.add_argument('--autoCrop', action='store_true',
+                        dest='auto_crop',
+                        help='Flag to automate the cropping of the image '
+                             'using pixel densities')
+    parser.add_argument('-k', '--keyword', type=str, dest='keyword',
+                        action='store', default='', help='Keyword argument '
+                        'to match certain files in the directory, will be '
+                        'ignored if the path is a single file')
+    parser.add_argument('-r', '--redo', action='store_true', dest='redo',
+                        help='Flag to recalculate results for path, whether '
+                        'it has already been performed or not')
 
     args = parser.parse_args(argv)
 
@@ -503,3 +571,188 @@ class CannyPlugin(plugins.OverlayPlugin):
                                      'low_threshold': self.low_threshold,
                                      'high_threshold': self.high_threshold})
         return new
+
+def analyze_frame(im, time, bounds, baseline_threshold, circ_thresh,
+                  lin_thresh, base_ord, σ, low, high, ε, lim, fit_type):
+    coords = extract_edges(im, σ=σ, low=low, high=high)
+    crop = crop_points(coords, bounds)
+
+    # Get the baseline from the left and right threshold pixels of the
+    # image (this is important not to crop too far)
+    baseline = {L: crop_points(coords, [bounds[0],
+                                        bounds[0]+baseline_threshold,
+                                        *bounds[2:]]),
+                R: crop_points(coords, [bounds[1]-baseline_threshold,
+                                        bounds[1],
+                                        *bounds[2:]])}
+
+    a = fit_line(np.concatenate((baseline[L],
+                                 baseline[R])), base_ord)[0]
+
+    f = {i: lambda x, y: x for i in [L, R]}
+    f[B] = lambda x, y: y - (np.dot(a, np.power(x, range(len(a)))))
+    f[T] = lambda x, y: y
+
+    b = np.copy(bounds)
+    b[3] = - circ_thresh
+    circle = crop_points(crop, b, f=f)
+
+    # Make sure that flat droplets (wetted) are ignored
+    # (i.e. assign angle to NaN and continue)
+    if circle.shape[0] < 5:
+        return (np.nan, np.nan), np.nan, np.nan, np.array(((np.nan, np.nan),(np.nan, np.nan))), np.array(((np.nan, np.nan),(np.nan, np.nan)))
+
+    # Baseline
+    x = np.linspace(0, im.shape[1])
+    y = np.dot(a, np.power(x, [[po]*len(x)
+                               for po in range(base_ord + 1)]))
+
+    baseline = np.array([x, y]).T
+
+    if fit_type == 'linear':
+        b = np.copy(bounds)
+        b[3] = -(circ_thresh + lin_thresh)
+        limits = generate_droplet_width(crop, b, f)
+
+        # Get linear points
+        f[T] = f[B]
+        linear_points = {L: crop_points(crop,
+                                        [int(limits[L]-2*lin_thresh),
+                                         int(limits[L]+2*lin_thresh),
+                                         -(circ_thresh+lin_thresh),
+                                         -circ_thresh], f=f),
+                         R: crop_points(crop,
+                                        [int(limits[R]-2*lin_thresh),
+                                         int(limits[R]+2*lin_thresh),
+                                         -(circ_thresh+lin_thresh),
+                                         -circ_thresh], f=f)}
+
+        if linear_points[L].size == 0 or linear_points[R].size == 0:
+            raise IndexError('We could not identify linear points, '
+                             f'try changing lin_thresh from {lin_thresh}')
+
+        v, b, m, bv, vertical = generate_vectors(linear_points,
+                                                 limits, ε, a)
+
+        # Calculate the angle between these two vectors defining the
+        # base-line and tangent-line
+        ϕ = {i: calculate_angle(bv[i], v[i]) for i in [L, R]}
+
+        # Plot lines
+        for side in [L, R]:
+            x = np.linspace(0, im.shape[1])
+            if not vertical[side]:
+                y = m[side] * x + b[side]
+            else:
+                y = np.linspace(0, im.shape[0])
+                x = m[side] * y + b[side]
+        fit = np.array([x, y]).T
+
+        baseline_width = limits[R] - limits[L]
+
+        volume = np.NaN
+        # TODO:// Add the actual volume calculation here!
+
+    elif fit_type == 'circular' or fit_type == 'bashforth-adams':
+        # Get the cropped image width
+        width = bounds[1] - bounds[0]
+
+        res = fit_circle(circle, width, start=True)
+        *z, r = res['x']
+
+        theta = np.linspace(0, 2 * np.pi, num=500)
+        x = z[0] + r * np.cos(theta)
+        y = z[1] + r * np.sin(theta)
+
+        iters = 0
+
+        # Keep retrying the fitting while the function value is
+        # large, as this indicates that we probably have 2 circles
+        # (e.g. there's something light in the middle of the image)
+        while res['fun'] >= circle.shape[0] and iters < lim:
+
+            # Extract and fit only those points outside
+            # the previously fit circle
+            points = np.array([(x, y) for x, y in circle
+                              if (x - z[0]) ** 2 + (y - z[1]) ** 2
+                              >= r ** 2])
+            res = fit_circle(points, width)
+            *z, r = res['x']
+            iters += 1
+
+        x_t, y_t = find_intersection(a, res['x'])
+
+        v1, v2 = generate_circle_vectors([x_t, y_t])
+
+        ϕ = {i: calculate_angle(v1, v2) for i in [L, R]}
+        if fit_type == 'circular':
+            baseline_width = 2 * x_t
+
+            volume = (2/3 * np.pi * r ** 3
+                      + np.pi * r ** 2 * y_t
+                      - np.pi * y_t ** 3 / 3)
+
+            # Fitted circle
+            theta = np.linspace(0, 2 * np.pi, num=100)
+            x = z[0] + r * np.cos(theta)
+            y = z[1] + r * np.sin(theta)
+            fit = np.array([x, y]).T
+        else:
+            # Get points within 10 pixels of the circle edge
+            points = np.array([(x, y) for x, y in circle
+                               if (x - z[0]) ** 2 + (y - z[1]) ** 2
+                               >= (r-10) ** 2])
+
+            points[:, 1] = - np.array([y - np.dot(a, np.power(y,
+                             range(len(a)))) for y in points[:, 1]])
+            center = (np.max(points[:, 0]) + np.min(points[:, 0]))/2
+            points[:, 0] = points[:, 0] - center
+            h = np.max(points[:, 1])
+            points = np.vstack([points[:, 0],
+                                h - points[:, 1]]).T
+
+            cap_length, curv = fit_bashforth_adams(points).x
+            θs, pred = sim_bashforth_adams(h, cap_length, curv)
+            ϕ[L] = -np.min(θs)
+            ϕ[R] = np.max(θs)
+
+            θ = (ϕ[L] + ϕ[R])/2
+
+            R0 = pred[np.argmax(θs),0] - pred[np.argmin(θs),0]
+            baseline_width = R0
+
+            P = 2*cap_length/ curv
+            volume = np.pi * R0 * (R0 * h + R0 * P - 2 * np.sin(θ))
+            x = pred[:, 0] + center
+            y = np.array([np.dot(a, np.power(y, range(len(a)))) + y
+                          for y in (pred[:, 1] - h)])
+            fit = np.array([x, y]).T
+
+    else:
+        raise Exception('Unknown fit type! Try another.')
+
+    # FI FITTYPE
+    output_text(time, ϕ, baseline_width, volume)
+
+    return (ϕ[L], ϕ[R]), baseline_width, volume, fit, baseline
+
+
+def output_fits(images, fits, baselines, bounds):
+    num = int(np.ceil(np.sqrt(len(images))))
+    fig, axes = plt.subplots(nrows=num, ncols=num)
+    axes = axes.flatten()
+    for j, im in enumerate(images):
+        axes[j].imshow(im, cmap='gray', vmin=0, vmax=1)
+        axes[j].axis('off')
+        axes[j].plot(baselines[j][:, 0], baselines[j][:, 1], 'r-')
+        axes[j].plot(fits[j][:, 0], fits[j][:, 1], 'r-')
+        axes[j].set_xlim(bounds[0:2])
+        axes[j].set_ylim(bounds[-1:-3:-1])
+
+    for k in range(j, num**2):
+        axes[k].axis('off')
+
+    for k in range(j, num**2):
+        axes[k].axis('off')
+
+    plt.show()

@@ -7,11 +7,15 @@ import os
 
 import matplotlib.pyplot as plt
 
+from joblib import Parallel, delayed
+
 import numpy as np
 
 import re
 
 from skimage import io
+
+import time as t
 
 from contactangles.imageanalysis import (L, R, T, B)
 from contactangles.imageanalysis import (parse_cmdline,
@@ -30,7 +34,10 @@ from contactangles.imageanalysis import (parse_cmdline,
                                          generate_circle_vectors,
                                          find_intersection,
                                          fit_bashforth_adams,
-                                         sim_bashforth_adams)
+                                         sim_bashforth_adams,
+                                         analyze_frame,
+                                         output_fits,
+                                         auto_crop)
 
 from contactangles.movie_handling import (extract_grayscale_frames,
                                           output_plots,
@@ -60,13 +67,19 @@ def main(argv=None):
     if os.path.isfile(args.path):
         files = [args.path]
     elif os.path.isdir(args.path):
-        files = [args.path+f for f in os.listdir(args.path)
-                 if re.match(r'.*\.(avi|mp4|jpg|png|gif)$', f)
-                 if not os.path.exists(f'results_{f}.csv')]
+        exts = '(avi|mp4|jpg|png|gif)'
+        if not args.redo:
+            files = [args.path+f for f in os.listdir(args.path)
+                     if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)
+                     if not os.path.exists(f'{args.path}results_{f}.csv')]
+        else:
+            files = [args.path+f for f in os.listdir(args.path)
+                     if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)]
 
     plt.ion()
     for file in files:
         # Get the file type for the image file
+        print(f'Analyzing {file}')
         ext = os.path.splitext(file)[-1]
 
         video = False
@@ -88,214 +101,48 @@ def main(argv=None):
                                                     start_time=vid_start,
                                                     data_freq=frame_rate)
 
-        bounds = get_crop(images[0])
-
-        angles = []
-        volumes = []
-        base_width = []
-
         # Make sure that the edges are being detected well
         low, high = None, None
         if args.checkFilter:
-            σ, low, high = sigma_setter(images[0], σ=σ, bounds=bounds)
+            σ, low, high = sigma_setter(images[0], σ=σ)
 
-        # Create a set of axes to hold the scatter points for all frames in
-        # the videos
-        plt.figure()
-        scatter_axis = plt.axes()
-        scatter_axis.invert_yaxis()
+        if not args.auto_crop:
+            bounds = get_crop(images[0])
+        else:
+            bounds = auto_crop(images[0])
 
-        plt.figure(figsize=(5, 5))
-        image_axes = plt.axes()
-        plt.show()
+        # # Create a set of axes to hold the scatter points for all frames in
+        # # the videos
+        # plt.figure()
+        # scatter_axis = plt.axes()
+        # scatter_axis.invert_yaxis()
 
-        for j, im in enumerate(images):
-            coords = extract_edges(im, σ=σ, low=low, high=high)
-            crop = crop_points(coords, bounds)
+        # plt.figure(figsize=(5, 5))
+        # image_axes = plt.axes()
+        # plt.show()
 
-            # Get the baseline from the left and right threshold pixels of the
-            # image (this is important not to crop too far)
-            baseline = {L: crop_points(coords, [bounds[0],
-                                                bounds[0]+baseline_threshold,
-                                                *bounds[2:]]),
-                        R: crop_points(coords, [bounds[1]-baseline_threshold,
-                                                bounds[1],
-                                                *bounds[2:]])}
+        out = Parallel(n_jobs=8)(delayed(analyze_frame)(im, time[j], bounds,
+                                                  baseline_threshold,
+                                                  circ_thresh, lin_thresh,
+                                                  base_ord, σ, low, high,
+                                                  ε, lim, fit_type)
+                           for j, im in enumerate(images))
 
-            a = fit_line(np.concatenate((baseline[L],
-                                         baseline[R])), base_ord)[0]
-
-            f = {i: lambda x, y: x for i in [L, R]}
-            f[B] = lambda x, y: y - (np.dot(a, np.power(x, range(len(a)))))
-            f[T] = lambda x, y: y
-
-            b = np.copy(bounds)
-            b[3] = - circ_thresh
-            circle = crop_points(crop, b, f=f)
-
-            # Make sure that flat droplets (wetted) are ignored
-            # (i.e. assign angle to NaN and continue)
-            if circle.shape[0] < 5:
-                angles += [(np.NaN, np.NaN)]
-                base_width += [np.NaN]
-                continue
-
-            scatter_axis.scatter(circle[:, 0], circle[:, 1])
-
-            # Plot the current image
-            image_axes.clear()
-            image_axes.imshow(im, cmap='gray', vmin=0, vmax=1)
-            image_axes.axis('off')
-
-            # Baseline
-            x = np.linspace(0, im.shape[1])
-            y = np.dot(a, np.power(x, [[po]*len(x)
-                                       for po in range(base_ord + 1)]))
-            image_axes.plot(x, y, 'r-')
-            plt.show()
-
-            if fit_type == 'linear':
-                b = np.copy(bounds)
-                b[3] = -(circ_thresh + lin_thresh)
-                limits = generate_droplet_width(crop, b, f)
-
-                # Get linear points
-                f[T] = f[B]
-                linear_points = {L: crop_points(crop,
-                                                [int(limits[L]-lin_thresh/2),
-                                                 int(limits[L]+lin_thresh/2),
-                                                 -(circ_thresh+lin_thresh),
-                                                 -circ_thresh], f=f),
-                                 R: crop_points(crop,
-                                                [int(limits[R]-lin_thresh/2),
-                                                 int(limits[R]+lin_thresh/2),
-                                                 -(circ_thresh+lin_thresh),
-                                                 -circ_thresh], f=f)}
-
-                v, b, m, bv, vertical = generate_vectors(linear_points,
-                                                         limits, ε, a)
-
-                # Calculate the angle between these two vectors defining the
-                # base-line and tangent-line
-                ϕ = {i: calculate_angle(bv[i], v[i]) for i in [L, R]}
-
-                # Plot lines
-                for side in [L, R]:
-                    x = np.linspace(0, im.shape[1])
-                    if not vertical[side]:
-                        y = m[side] * x + b[side]
-                    else:
-                        y = np.linspace(0, im.shape[0])
-                        x = m[side] * y + b[side]
-                    image_axes.plot(x, y, 'r-')
-
-                baseline_width = limits[R] - limits[L]
-
-                volume = np.NaN
-                # TODO:// Add the actual volume calculation here!
-
-            elif fit_type == 'circular' or fit_type == 'bashforth-adams':
-                # Get the cropped image width
-                width = bounds[1] - bounds[0]
-
-                res = fit_circle(circle, width, start=True)
-                *z, r = res['x']
-
-                theta = np.linspace(0, 2 * np.pi, num=500)
-                x = z[0] + r * np.cos(theta)
-                y = z[1] + r * np.sin(theta)
-
-                iters = 0
-
-                # Keep retrying the fitting while the function value is
-                # large, as this indicates that we probably have 2 circles
-                # (e.g. there's something light in the middle of the image)
-                while res['fun'] >= circle.shape[0] and iters < lim:
-
-                    # Extract and fit only those points outside
-                    # the previously fit circle
-                    points = np.array([(x, y) for x, y in circle
-                                      if (x - z[0]) ** 2 + (y - z[1]) ** 2
-                                      >= r ** 2])
-                    res = fit_circle(points, width)
-                    *z, r = res['x']
-                    iters += 1
-
-                x_t, y_t = find_intersection(a, res['x'])
-
-                v1, v2 = generate_circle_vectors([x_t, y_t])
-
-                ϕ = {i: calculate_angle(v1, v2) for i in [L, R]}
-                if fit_type == 'circular':
-                    baseline_width = 2 * x_t
-
-                    volume = (2/3 * np.pi * r ** 3
-                              + np.pi * r ** 2 * y_t
-                              - np.pi * y_t ** 3 / 3)
-
-                    # Fitted circle
-                    theta = np.linspace(0, 2 * np.pi, num=100)
-                    x = z[0] + r * np.cos(theta)
-                    y = z[1] + r * np.sin(theta)
-                    image_axes.plot(x, y, 'r-')
-                else:
-                    # Get points within 10 pixels of the circle edge
-                    points = np.array([(x, y) for x, y in circle
-                                       if (x - z[0]) ** 2 + (y - z[1]) ** 2
-                                       >= (r-10) ** 2])
-
-                    points[:, 1] = - np.array([y - np.dot(a, np.power(y,
-                                     range(len(a)))) for y in points[:, 1]])
-                    center = (np.max(points[:, 0]) + np.min(points[:, 0]))/2
-                    points[:, 0] = points[:, 0] - center
-                    h = np.max(points[:, 1])
-                    points = np.vstack([points[:, 0],
-                                        h - points[:, 1]]).T
-
-                    cap_length, curv = fit_bashforth_adams(points).x
-                    θs, pred = sim_bashforth_adams(h, cap_length, curv)
-                    ϕ[L] = -np.min(θs)
-                    ϕ[R] = np.max(θs)
-
-                    θ = (ϕ[L] + ϕ[R])/2
-
-                    R0 = pred[np.argmax(θs),0] - pred[np.argmin(θs),0]
-                    baseline_width = R0
-
-                    P = 2*cap_length/ curv
-                    volume = np.pi * R0 * (R0 * h + R0 * P - 2 * np.sin(θ))
-                    x = pred[:, 0] + center
-                    y = np.array([np.dot(a, np.power(y, range(len(a)))) + y
-                                  for y in (pred[:, 1] - h)])
-                    image_axes.plot(x, y, 'r-')
-
-            else:
-                raise Exception('Unknown fit type! Try another.')
-
-            # FI FITTYPE
-            output_text(time[j], ϕ, baseline_width, volume)
-            angles += [(ϕ[L], ϕ[R])]
-            base_width += [baseline_width]
-            volumes += [volume]
-
-            # Format the plot nicely
-            image_axes.set_xlim(bounds[0:2])
-            image_axes.set_ylim(bounds[-1:-3:-1])
-            plt.draw()
-            plt.pause(0.1)
-
-        # END LOOP THROUGH IMAGES
+        angles, base_width, volumes, fits, baselines = zip(*out)
 
         if video:
             output_plots(time, angles, base_width, volumes)
 
+        output_fits(images, fits, baselines, bounds)
         output_datafile(file, time, angles, base_width, volumes)
-    if args.block_at_end:
-        plt.ioff()
-        plt.show()
-    else:
-        plt.close('all')
-        plt.ioff()
+
+        if args.block_at_end:
+            plt.ioff()
+            plt.show()
+        else:
+            t.sleep(2)
+            plt.close('all')
+            plt.ioff()
 
 if __name__ == '__main__':
     main()
