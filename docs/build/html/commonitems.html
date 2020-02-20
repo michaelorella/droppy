@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Common Functionality &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Bashfoth-Adams Fitting" href="bafits.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.common">
+<span id="common-functionality"></span><h1>Common Functionality<a class="headerlink" href="#module-droppy.common" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="droppy.common.baseF">
+<code class="sig-prename descclassname">droppy.common.</code><code class="sig-name descname">baseF</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.common.baseF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the baseline y-pixel value at a specified <code class="docutils literal notranslate"><span class="pre">x</span></code> position, with
+best fit parameters <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">baseF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">10</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">baseF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">10</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">baseF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">20</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">baseF</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">120</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Scalar x-pixel location being probed</p></li>
+<li><p><strong>a</strong> – Numpy array with best-fit polynomial coefficients to the
+baseline</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>y-pixel value of the baseline with these parameters at <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.common.calculate_angle">
+<code class="sig-prename descclassname">droppy.common.</code><code class="sig-name descname">calculate_angle</code><span class="sig-paren">(</span><em class="sig-param">v1</em>, <em class="sig-param">v2</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.common.calculate_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the angle between two vectors of equal length</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v1</strong> – numpy array</p></li>
+<li><p><strong>v2</strong> – numpy array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>angle between the two vectors v1 and v2 in degrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.common.positive_float">
+<code class="sig-prename descclassname">droppy.common.</code><code class="sig-name descname">positive_float</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.common.positive_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type checking for positive floats passed to the command-line parser</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – Input that is to be type-checked (scalar)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Input cast to a float</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ArgumentTypeError</strong> – If the input is less than 0 or cannot be cast
+to a float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.common.positive_int">
+<code class="sig-prename descclassname">droppy.common.</code><code class="sig-name descname">positive_int</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.common.positive_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type checking for positive integers passed to the command-line parser</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – Input that is to be type-checked (scalar)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Input cast to an int</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ArgumentTypeError</strong> – If the input is less than 0 or cannot be cast
+to an integer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="default_usage.html">Script Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_analysis.html">Image Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edge_detection.html">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="circularfits.html">Spherical Cap Approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bafits.html">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="bafits.html" title="previous chapter">Bashfoth-Adams Fitting</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/commonitems.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

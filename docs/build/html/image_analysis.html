@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Image Analysis &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Edge Detection" href="edge_detection.html" />
+    <link rel="prev" title="Script Usage" href="default_usage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.imageanalysis">
+<span id="image-analysis"></span><h1>Image Analysis<a class="headerlink" href="#module-droppy.imageanalysis" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="droppy.imageanalysis.auto_crop">
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">auto_crop</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">pad=50</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">low=None</em>, <em class="sig-param">high=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.auto_crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically identify where the crop should be placed within the original
+image</p>
+<p>This function makes several assumptions about the image layout to look
+at where the edge density is the highest and center the crop at these
+locations. The bounds of the image are typically identified by looking
+for sharp changes in the edge density as a function of x or y position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> – 2D numpy array of [x,y] coordinates of the edges of the
+image</p></li>
+<li><p><strong>pad</strong> – width in pixels of space around the automatically identified
+cropping box</p></li>
+<li><p><strong>σ</strong> – Gaussian filter used for the Canny detection algorithm</p></li>
+<li><p><strong>low</strong> – Value of the weak pixels in the dual thresholding</p></li>
+<li><p><strong>high</strong> – value of the strong pixels in the dual thresholding</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of [left, right, top, bottom] values for the edges of the
+bounding box</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.imageanalysis.crop_points">
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">crop_points</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">bounds</em>, <em class="sig-param">f=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.crop_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a cropped image with points only lying inside the bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> – numpy array of [x,y] coordinates of detected edges</p></li>
+<li><p><strong>bounds</strong> – list of [left, right, top, bottom] image bounds - because
+of the way that images are read, bottom &gt; top numerically</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>abbreviated numpy array of [x,y] coordinates that are within
+bounds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.imageanalysis.get_crop">
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">get_crop</code><span class="sig-paren">(</span><em class="sig-param">image</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.get_crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the original image to allow the user to crop any extraneous
+information out of the frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> – 2D numpy array grayscale image</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of [left, right, top, bottom] values for the edges of the
+bounding box</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.imageanalysis.output_fits">
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_fits</code><span class="sig-paren">(</span><em class="sig-param">images</em>, <em class="sig-param">fits</em>, <em class="sig-param">baselines</em>, <em class="sig-param">bounds</em>, <em class="sig-param">linear=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_fits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the original images with the overlaid fits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> – List of 2D numpy grayscale images</p></li>
+<li><p><strong>fits</strong> – List of 2D numpy [x,y] coordinates that specify the fit
+locations</p></li>
+<li><p><strong>baselines</strong> – List of 2D numpy [x,y] coordinates that specify baseline</p></li>
+<li><p><strong>bounds</strong> – list of [left, right, top, bottom]</p></li>
+<li><p><strong>linear</strong> – boolean to tell whether the fittype was linear or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None outputs plots comparing the original images to the best fits</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.imageanalysis.output_text">
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_text</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">φ</em>, <em class="sig-param">baseline_width</em>, <em class="sig-param">volume</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the results of the frame analyzed on the command line</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">output_text</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100000</span><span class="p">)</span>
+<span class="go">At time 1.0 Contact angle left (deg): 90 Contact angle right (deg): 90</span>
+<span class="go">contact angle average (deg): 90 Baseline width (px): 100</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> – float time in seconds to be reported</p></li>
+<li><p><strong>ϕ</strong> – tuple of contact angles at the left and right droplet edges</p></li>
+<li><p><strong>baseline_width</strong> – float distance in pixels between the contact points
+of the droplet</p></li>
+<li><p><strong>volume</strong> – volume of the droplet in pixels**3</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None, outputs a line of text to the terminal</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="default_usage.html">Script Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Image Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edge_detection.html">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="circularfits.html">Spherical Cap Approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bafits.html">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonitems.html">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="default_usage.html" title="previous chapter">Script Usage</a></li>
+      <li>Next: <a href="edge_detection.html" title="next chapter">Edge Detection</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/image_analysis.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Edge Detection &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Linear Fitting" href="linearfits.html" />
+    <link rel="prev" title="Image Analysis" href="image_analysis.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.edgedetection">
+<span id="edge-detection"></span><h1>Edge Detection<a class="headerlink" href="#module-droppy.edgedetection" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="droppy.edgedetection.CannyPlugin">
+<em class="property">class </em><code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">CannyPlugin</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modification of Canny Plugin provided by Scikit-image to return parameter
+values</p>
+<p>Uses the default values of:</p>
+<ul class="simple">
+<li><p>sigma == 0 (No Gaussian blurring)</p></li>
+<li><p>high == 1 (strong pixels are all the way on)</p></li>
+<li><p>low == 1 (weak pixels are all the way on)</p></li>
+</ul>
+<dl class="method">
+<dt id="droppy.edgedetection.CannyPlugin.add_widget">
+<code class="sig-name descname">add_widget</code><span class="sig-paren">(</span><em class="sig-param">widget</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.add_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the new Canny filter widget ot the plugin while registering a new
+callback method to set the widgets attributes so they can be accessed
+later.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="droppy.edgedetection.CannyPlugin.attach">
+<code class="sig-name descname">attach</code><span class="sig-paren">(</span><em class="sig-param">image_viewer</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.attach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the attaching of the plugin to the ImageViewer. This utilizes
+nearly identical implementation to <a class="reference external" href="https://github.com/scikit-image/">https://github.com/scikit-image/</a>
+scikit-image/blob/master/skimage/viewer/plugins/canny.py, but changes
+the limits for parameter selection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="droppy.edgedetection.CannyPlugin.output">
+<code class="sig-name descname">output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the default output behavior so that when the ImageViewer is
+closed, the result contains parameter values that we need to pass on
+to all future edge detection calls.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.edgedetection.extract_edges">
+<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">extract_edges</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">low=None</em>, <em class="sig-param">high=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.extract_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the detected edges using the canny algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> – numpy grayscale image</p></li>
+<li><p><strong>σ</strong> – canny filter value to use</p></li>
+<li><p><strong>check_σ</strong> – flag whether to visually check the edges that are detected</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of [x,y] coordinates for the detected edges</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.edgedetection.sigma_setter">
+<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">sigma_setter</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">bounds=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.sigma_setter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the user the image with the detected edges overlain in a way that
+they can update the edge detection parameters and see the impact on the
+edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> – 2D numpy grayscale image</p></li>
+<li><p><strong>σ</strong> – Standard deviation value for the Gaussian blur applied before
+edge detection</p></li>
+<li><p><strong>bounds</strong> – List of [left, right, top, bottom] crop for the image area</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="default_usage.html">Script Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_analysis.html">Image Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="circularfits.html">Spherical Cap Approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bafits.html">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonitems.html">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="image_analysis.html" title="previous chapter">Image Analysis</a></li>
+      <li>Next: <a href="linearfits.html" title="next chapter">Linear Fitting</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/edge_detection.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

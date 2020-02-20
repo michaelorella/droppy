@@ -4,13 +4,13 @@ import versioneer
 with open('README.md', 'r') as f:
     desc = f.read()
 
-setup(name="contactangles",
+setup(name="droppy",
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
       author="Michael J. Orella",
       author_email="morella@mit.edu",
       license='MIT',
-      packages=['contactangles'],
+      packages=['droppy'],
       python_requires='>3.6',
       test_suite='tests',
       install_requires=['numpy',
@@ -27,6 +27,6 @@ setup(name="contactangles",
       long_description_content_type='text/markdown',
       url='https://github.com/michaelorella/contactangles',
       entry_points={'console_scripts':
-                    ['analysis=contactangles.analysis:main']
+                    ['droppy=droppy.droppy:main']
                     }
       )

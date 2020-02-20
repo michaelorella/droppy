@@ -2,8 +2,11 @@ import unittest
 import unittest.mock
 
 from io import StringIO
+import sys
+import os
 
-from contactangles.analysis import main
+from droppy.droppy import main, parse_cmdline
+
 
 import functools
 
@@ -69,3 +72,32 @@ class TestFullAnalysisScript(unittest.TestCase):
     @automate_mouse_action([[144, 278], [494, 482]])
     def test_neutral_circular_fit(self):
         main(['test_images/neutral_flat.avi','--fitType','circular'])
+
+
+class TestCommandLineParser(unittest.TestCase):
+    def test_defaults(self):
+        args = parse_cmdline('')
+
+        self.assertEqual(args.path, './')
+        self.assertEqual(args.baseline_threshold, 20)
+        self.assertEqual(args.base_ord, 1)
+        self.assertEqual(args.circ_thresh, 5)
+        self.assertEqual(args.lin_thresh, 10)
+        self.assertEqual(args.frame_rate, 1)
+        self.assertEqual(args.σ, 1)
+        self.assertFalse(args.checkFilter)
+        self.assertEqual(args.video_start_time, 10)
+        self.assertEqual(args.fit_type, 'linear')
+        self.assertEqual(args.ε, 1e-2)
+        self.assertEqual(args.lim, 10)
+        self.assertEqual(args.tolerance, 8)
+
+    def test_parsing_file(self):
+        args = parse_cmdline(['./test_images/neutral_flat.avi'])
+
+        self.assertTrue(os.path.isfile(args.path))
+
+    def test_parsing_directory(self):
+        args = parse_cmdline(['./test_images/'])
+
+        self.assertTrue(os.path.isdir(args.path))

@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Spherical Cap Approximation &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Bashfoth-Adams Fitting" href="bafits.html" />
+    <link rel="prev" title="Linear Fitting" href="linearfits.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.circularfits">
+<span id="spherical-cap-approximation"></span><h1>Spherical Cap Approximation<a class="headerlink" href="#module-droppy.circularfits" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="droppy.circularfits.dist">
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">dist</code><span class="sig-paren">(</span><em class="sig-param">param</em>, <em class="sig-param">points</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the total distance from the calculated circle to the points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param</strong> – list of 3 elements with the center of a circle and its
+radius</p></li>
+<li><p><strong>points</strong> – list of (x, y) points that should be lying on the circle</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the sum of squared errrors from the points on the circle with
+the provided parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.circularfits.find_intersection">
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">find_intersection</code><span class="sig-paren">(</span><em class="sig-param">baseline_coeffs</em>, <em class="sig-param">circ_params</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.find_intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the intersection points between the best fit circle and best-fit
+baseline.</p>
+<p>For this we rely on several coordinate transformations, first a
+translation to the centerpoint of the circle and then a rotation to give
+the baseline zero-slope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>baseline_coeffs</strong> – Numpy array of coefficients to the baseline
+polynomial</p></li>
+<li><p><strong>circ_params</strong> – centerpoint and radius of best-fit circle</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(x,y) point of intersection between these two shapes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.circularfits.fit_circle">
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">fit_circle</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">width=None</em>, <em class="sig-param">start=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.fit_circle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the best-fit circle to <code class="docutils literal notranslate"><span class="pre">points</span></code> by minimizing <code class="docutils literal notranslate"><span class="pre">dist</span></code> from
+changing values of the centerpoint and radius</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – list of (x,y) points lying on the droplet to fit</p></li>
+<li><p><strong>width</strong> – estimated width of the droplet from the crop boundaries</p></li>
+<li><p><strong>start</strong> – boolean flag to determine how many parameters to fit (just
+radius if True, otherwise radius and centerpoint)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>result structure from scipy.opt.minimize</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.circularfits.generate_circle_vectors">
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">generate_circle_vectors</code><span class="sig-paren">(</span><em class="sig-param">intersection</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.generate_circle_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the intersection point with the baseline, compute the vector that
+points tangent to the circle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>intersection</strong> – (x,y) point on the circle that crosses the baseline</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>baseline vector and vector tangent to best-fit circle</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="default_usage.html">Script Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_analysis.html">Image Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edge_detection.html">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Spherical Cap Approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bafits.html">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonitems.html">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="linearfits.html" title="previous chapter">Linear Fitting</a></li>
+      <li>Next: <a href="bafits.html" title="next chapter">Bashfoth-Adams Fitting</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/circularfits.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

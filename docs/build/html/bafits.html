@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bashfoth-Adams Fitting &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Common Functionality" href="commonitems.html" />
+    <link rel="prev" title="Spherical Cap Approximation" href="circularfits.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.bafits">
+<span id="bashfoth-adams-fitting"></span><h1>Bashfoth-Adams Fitting<a class="headerlink" href="#module-droppy.bafits" title="Permalink to this headline">¶</a></h1>
+<dl class="attribute">
+<dt id="droppy.bafits.bashforth_adams">
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">bashforth_adams</code><a class="headerlink" href="#droppy.bafits.bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate of change of point on droplet profile with respect to the parametric
+angle ϕ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> – Parameteric angle ϕ</p></li>
+<li><p><strong>y</strong> – (x, z) point on the droplet profile</p></li>
+<li><p><strong>a</strong> – capillary length in units px</p></li>
+<li><p><strong>b</strong> – radius of curvature at apex in units of px</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate of change of each x and z with respect to ϕ</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.bafits.fit_bashforth_adams">
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">fit_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">a=0.1</em>, <em class="sig-param">b=3</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.fit_bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the best-fit capillary length and curvature at the apex given
+the provided data for the points on the edge of the droplet</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – list of (x, y) points of the droplet edges</p></li>
+<li><p><strong>a</strong> – initial guess of capillary length</p></li>
+<li><p><strong>b</strong> – initial guess of curvature at the apex</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>solution structure from scipy.opt.minimize</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.bafits.sim_bashforth_adams">
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">sim_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param">h</em>, <em class="sig-param">a=1</em>, <em class="sig-param">b=1</em>, <em class="sig-param">all_the_way=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.sim_bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates the full profile of the Bashforth-Adams droplet from the apex</p>
+<p>Starts at x = +-1e-5, z = 0 and integrates to z = h along the curve
+defined by the <code class="docutils literal notranslate"><span class="pre">bashforth-adams</span></code> function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h</strong> – Height of the droplet in px</p></li>
+<li><p><strong>a</strong> – Capillary length of the fluid</p></li>
+<li><p><strong>b</strong> – Curvature at the apex</p></li>
+<li><p><strong>all_the_way</strong> – Boolean to determine whether to stop at z==h or ϕ==180</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of ϕ and (x, z) coordinates where the solver executed</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="default_usage.html">Script Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_analysis.html">Image Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edge_detection.html">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="circularfits.html">Spherical Cap Approximation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonitems.html">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="circularfits.html" title="previous chapter">Spherical Cap Approximation</a></li>
+      <li>Next: <a href="commonitems.html" title="next chapter">Common Functionality</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/bafits.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

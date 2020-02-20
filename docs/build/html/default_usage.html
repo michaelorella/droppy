@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Script Usage &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Image Analysis" href="image_analysis.html" />
+    <link rel="prev" title="Welcome to DropPy’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-droppy.droppy">
+<span id="script-usage"></span><h1>Script Usage<a class="headerlink" href="#module-droppy.droppy" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="droppy.droppy.analyze_frame">
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">analyze_frame</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">time</em>, <em class="sig-param">bounds</em>, <em class="sig-param">baseline_threshold</em>, <em class="sig-param">circ_thresh</em>, <em class="sig-param">lin_thresh</em>, <em class="sig-param">base_ord</em>, <em class="sig-param">σ</em>, <em class="sig-param">low</em>, <em class="sig-param">high</em>, <em class="sig-param">ε</em>, <em class="sig-param">lim</em>, <em class="sig-param">fit_type</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.analyze_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report the main findings for a single contact angle image</p>
+<p>Takes the provided image and fits it with the specified method [‘linear’,
+‘circular’, ‘bashforth-adams’] to calculate the droplet contact angle,
+baseline width, and volume.</p>
+<p>Its main use lies within the DropPy main script, but it can also be used
+externally for debugging individual frames of a video file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – 2D numpy array of a grayscale image</p></li>
+<li><p><strong>time</strong> – float value of the movie time after burn-in</p></li>
+<li><p><strong>bounds</strong> – edges of the box which crop the image</p></li>
+<li><p><strong>baseline_threshold</strong> – boundary width within which only baseline
+pixels lie</p></li>
+<li><p><strong>circ_thresh</strong> – height above which the baseline does not exist</p></li>
+<li><p><strong>lin_thresh</strong> – distance that preserves a set of linear points on the
+droplet</p></li>
+<li><p><strong>base_ord</strong> – polynomial order of the baseline fitting</p></li>
+<li><p><strong>σ</strong> – value of the Gaussian filter used in the Canny algorithm</p></li>
+<li><p><strong>low</strong> – value of the weak pixels used in dual-thresholding</p></li>
+<li><p><strong>high</strong> – value of the strong pixels used in dual-thresholding</p></li>
+<li><p><strong>ε</strong> – size of finite difference step to take in approximating baseline
+slope</p></li>
+<li><p><strong>lim</strong> – maximum number of iterations to take during circle fitting</p></li>
+<li><p><strong>fit_type</strong> – specified method for fitting the droplet profile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>5-tuple of (L, R) contact angles, contact area diameter,
+calculated droplet volume, fitted (x, y) points on droplet, and
+fitted (x,y) points on baseline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.droppy.main">
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param">argv=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main analysis method for DropPy package</p>
+<p>This is the main entry point to the DropPy package for most users, and
+will serve as the most useful call signature. In addition to providing
+a functional form for accessing the DropPy software, the same features
+are provided by the <code class="docutils literal notranslate"><span class="pre">droppy</span></code> script at any command line interface where
+DropPy is installed. To access via the command line interface, simply use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ droppy &quot;filename&quot; --fitType bashforth-adams
+</pre></div>
+</div>
+<p>The above call will analyze the video/image/directory using the Bashforth-
+Adams fitting method, and will output the results in a csv of the same
+name for further visualization/processing. The different options for this
+script can be found by running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ droppy --help
+</pre></div>
+</div>
+<p>Options:</p>
+<dl class="option-list">
+<dt><kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></dt>
+<dd><p>show this help message and exit</p>
+</dd>
+<dt><kbd><span class="option">-b</span>, <span class="option">--baselineThreshold</span></kbd></dt>
+<dd><p>Pixel width that determines where baseline lies</p>
+</dd>
+<dt><kbd><span class="option">-o</span>, <span class="option">--baselineOrder</span></kbd></dt>
+<dd><p>The polynomial order that will be used in
+baseline fitting</p>
+</dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--circleThreshold</span></kbd></dt>
+<dd><p>Number of pixels above the baseline at which
+points are considered on the droplet</p>
+</dd>
+<dt><kbd><span class="option">-l</span>, <span class="option">--linearThreshold</span></kbd></dt>
+<dd><p>The number of pixels inside the circle which can
+be considered to be linear and should be fit to
+obtain angles</p>
+</dd>
+<dt><kbd><span class="option">-f</span>, <span class="option">--frequency</span></kbd></dt>
+<dd><p>Frequency at which to analyze images from a video</p>
+</dd>
+<dt><kbd><span class="option">--sigma</span></kbd></dt>
+<dd><p>Initial image filter used for edge detection</p>
+</dd>
+<dt><kbd><span class="option">--checkFilter</span></kbd></dt>
+<dd><p>Set flag to check the provided filter value or
+procede without any confirmation</p>
+</dd>
+<dt><kbd><span class="option">-s</span>, <span class="option">--startSeconds</span></kbd></dt>
+<dd><p>Amount of time in which video should be burned in
+before beginning analysis</p>
+</dd>
+<dt><kbd><span class="option">--fitType</span></kbd></dt>
+<dd><p>{linear,circular,bashforth-adams}
+Type of fit to perform to identify the contact
+angles</p>
+</dd>
+<dt><kbd><span class="option">--tolerance</span></kbd></dt>
+<dd><p>Finite difference tolerance</p>
+</dd>
+<dt><kbd><span class="option">--maxIters</span></kbd></dt>
+<dd><p>Maximum number of circle fitting iterations</p>
+</dd>
+<dt><kbd><span class="option">--verticalTolerance</span></kbd></dt>
+<dd><p>Pixel error for how bad the fit is before we try
+fitting x = my + b</p>
+</dd>
+<dt><kbd><span class="option">--blockAtEnd</span></kbd></dt>
+<dd><p>Flag to keep plots at the end of the script open
+for user review</p>
+</dd>
+<dt><kbd><span class="option">--autoCrop</span></kbd></dt>
+<dd><p>Flag to automate the cropping of the image using
+pixel densities</p>
+</dd>
+<dt><kbd><span class="option">-k</span>, <span class="option">--keyword</span></kbd></dt>
+<dd><p>Keyword argument to match certain files in the
+directory, will be ignored if the path is a
+single file</p>
+</dd>
+<dt><kbd><span class="option">-r</span>, <span class="option">--redo</span></kbd></dt>
+<dd><p>Flag to recalculate results for path, whether it
+has already been performed or not</p>
+</dd>
+<dt><kbd><span class="option">--nproc</span></kbd></dt>
+<dd><p>Number of processes to use for the parallel
+computation. If nproc == 1, the frames are
+analyzed in serial.</p>
+</dd>
+</dl>
+<p>To use this function within an interactive Python session, the function
+can be called explicitly.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">main</span><span class="p">([</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span><span class="s1">&#39;--fitType&#39;</span><span class="p">,</span> <span class="s1">&#39;bashforth-adams&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This will result in exactly the same behavior as the script, but provides
+an interactive interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – String command line arguments passed to the parser</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Outputs a text-based table of contact angles and baseline widths
+to the command line from which the program is run. Additionally,
+several simple plots are generated including a comparison
+between the original image files and the calculated fits and the
+contact angle and baseline width over time. Finally, these data
+are exported to a csv with the following naming structure
+“results_{filename}.csv”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="droppy.droppy.parse_cmdline">
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">parse_cmdline</code><span class="sig-paren">(</span><em class="sig-param">argv=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.parse_cmdline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract command line arguments to change program execution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – List of strings that were passed at the command line</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Namespace of arguments and their values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">DropPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Script Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_analysis.html">Image Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edge_detection.html">Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linearfits.html">Linear Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="circularfits.html">Spherical Cap Approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bafits.html">Bashfoth-Adams Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonitems.html">Common Functionality</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to DropPy’s documentation!</a></li>
+      <li>Next: <a href="image_analysis.html" title="next chapter">Image Analysis</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Mihael Orella.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/default_usage.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

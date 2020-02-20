@@ -9,10 +9,10 @@ A python script that follows a simple logical progression to reliably measure co
 The analysis script can be installed by cloning the repository into your desired working directory or via the following:
 
 ```
-$ pip install contactangles
+$ pip install droppy
 ```
 
-With the `pip` installation, the main script can be run from the command line by calling `analysis`; otherwise it must be run from within a Python instance (see Use section below).
+With the `pip` installation, the main script can be run from the command line by calling `droppy`; otherwise it must be run from within a Python instance (see Use section below).
 
 ### Dependencies
 
@@ -36,7 +36,7 @@ The following packages must already be installed in your Python environment to c
 Depending on the installation choice, the script can either be run from the command line:
 
 ```
-$ analysis path/to/files/of/interest
+$ droppy path/to/files/of/interest
 ```
 
 If you have installed as a developer, you can use the script by calling the `main()` function from the file `analysis.py`
@@ -50,8 +50,13 @@ The relevant threshold parameters that define where the tangent lines, baseline,
 These parameters can be accessed through the flags `--baselineThreshold`, `--circleThreshold`, and `--linThreshold` respectively. Additional flags can be set and can be shown from the help accessed by
 
 ```
-$ analysis --help
+$ droppy --help
 ```
+
+### Documentation
+
+A GitHub pages site with the full documentation and API is provided ![here](https://michaelorella.github.io/droppy/)
+
 
 ## Credits
 

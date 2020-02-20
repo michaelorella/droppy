@@ -3,7 +3,7 @@ import unittest.mock
 
 import imageio
 
-from contactangles.movie_handling import extract_grayscale_frames
+from droppy.moviehandling import extract_grayscale_frames
 
 import logging
 import sys
