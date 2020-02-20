@@ -55,7 +55,7 @@ $ droppy --help
 
 ### Documentation
 
-A GitHub pages site with the full documentation and API is provided ![here](https://michaelorella.github.io/droppy/)
+A GitHub pages site with the full documentation and API is provided [here](https://michaelorella.github.io/droppy/)
 
 
 ## Credits
