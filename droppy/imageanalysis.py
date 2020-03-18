@@ -8,6 +8,7 @@ import numpy as np
 import warnings
 
 from droppy.common import L, R, T, B
+from droppy.edgedetection import extract_edges
 
 def get_crop(image):
     '''
