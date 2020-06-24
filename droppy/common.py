@@ -37,6 +37,27 @@ def positive_float(value):
                                          'float value')
     return float(value)
 
+def positive_int_or_rel(value):
+    '''
+    Type checking for thresholds passed to the command-line parser that must
+    either be positive integer (pixel) values or negative floats between 0 and
+    -1 (relative) values.
+
+    :param value: Input that is to be type-checked (scalar)
+    :return: Input cast to an int
+    :raises ArgumentTypeError: If the input is less than -1 or cannot be cast
+                               to a float
+    '''
+
+    if float(value) < -1:
+        raise argparse.ArgumentTypeError(f'{value} is not a relative negative value'
+                                         ' or positive int')
+    if int(value) > 0:
+        return int(value)
+    else:
+        return float(value)
+
+
 def calculate_angle(v1, v2):
     '''
     Compute the angle between two vectors of equal length

@@ -1,5 +1,7 @@
 from skimage.viewer import ImageViewer
 from skimage.viewer.canvastools import RectangleTool
+from skimage.transform import hough_circle, hough_circle_peaks, hough_line, hough_line_peaks
+
 
 import matplotlib.pyplot as plt
 
@@ -34,15 +36,14 @@ def get_crop(image):
     plt.ion()
     return np.array(np.round(bounds), dtype=int)
 
-def auto_crop(image, pad=50, σ=1, low=None, high=None):
+def auto_crop(image, pad=25, σ=1, low=None, high=None):
     '''
     Automatically identify where the crop should be placed within the original
     image
 
-    This function makes several assumptions about the image layout to look
-    at where the edge density is the highest and center the crop at these
-    locations. The bounds of the image are typically identified by looking
-    for sharp changes in the edge density as a function of x or y position.
+    This function utilizes the skimage circular Hough transfrom implementation
+    to identify the most circular object in the image (the droplet), and
+    center it within a frame that extends by 'pad' to each side.
 
     :param image: 2D numpy array of [x,y] coordinates of the edges of the
                   image
@@ -54,55 +55,43 @@ def auto_crop(image, pad=50, σ=1, low=None, high=None):
     :return: list of [left, right, top, bottom] values for the edges of the
              bounding box
     '''
+    min_top = min_left = 0
+    max_bottom, max_right = image.shape
     print('Performing auto-cropping, please wait...')
-    edges = extract_edges(image, σ=σ, low=low, high=high)
-    x = edges[:, 0]
-    y = edges[:, 1]
+    edges = extract_edges(image, σ=σ, low=low, high=high, indices=False)
 
-    binwidth = 1
-    lim = np.ceil(np.abs([x, y]).max() / binwidth) * binwidth
-    bins = np.arange(0, lim + 2*binwidth, binwidth)
+    radii_Δ = 10
 
-    hist, bin_edges = np.histogram(y, bins=bins)
-    zero_locations = [b for b, c in zip(bin_edges, hist) if c == 0]
-    tops = [b for b, δ in zip(zero_locations, np.diff(zero_locations))
-            if δ > 1]
-    zero_loc, top, *_ = tops
-    bottom = zero_locations[zero_locations.index(top) + 1] + pad
-    top -= pad
+    # Generate the circle Hough accumulator
+    hough_radii = np.arange(np.min(image.shape)//10, np.max(image.shape),
+                            radii_Δ)
+    hough_res = hough_circle(edges, hough_radii, full_output=True,
+                             normalize=False)
+    accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
+                                               total_num_peaks=1,
+                                               normalize=False)
 
-    temp_x = np.array([x_pt for x_pt, y_pt in zip(x, y)
-                       if top <= y_pt <= bottom])
-    hist, bin_edges = np.histogram(temp_x, bins=bins)
-    temp_x = np.array([x_pt for x_pt in temp_x
-                       if hist[np.where(bin_edges==x_pt)] > 1])
-    nonzeros = np.array([b for c, b in zip(*np.histogram(temp_x, bins=bins))
-                         if c != 0])
-    gaps = np.where(np.diff(nonzeros) > pad)[0]
+    max_R = np.max(hough_radii)
 
-    if gaps.size != 0:
-        #Have some large gap
-        x_bar = nonzeros.mean()
-        left_sides = nonzeros[gaps]
-        if (left_sides < x_bar).any():
-            left = nonzeros[np.where(nonzeros == left_sides
-                                     [np.where(left_sides
-                                               < x_bar)][-1])[0][0] + 1]
-        else:
-            left = nonzeros[0]
+    *z, r = cx[0] - max_R, cy[0] - max_R, radii[0]
 
-        left -= pad
+    # Get the baseline position for the bottom of the image
+    accums, angles, dists = hough_line_peaks(*hough_line(edges), num_peaks=1)
+    if np.abs(angles[0]) < 80/180*np.pi:
+        accums, angles, dists = hough_line_peaks(*hough_line(edges[z[1] - r - pad:,:]),
+                                                 num_peaks=1)
+        if np.abs(angles[0]) < 80/180*np.pi:
+            raise(RuntimeError(f'The detected baseline makes an angle of'
+                               f'{angles[0]*180/np.pi: 0.2f}' + u'\N{DEGREE SIGN}'
+                               ' with the vertical, but this was expected to be > 80'
+                               u'\N{DEGREE SIGN}. Make sure the image is horizontal.'))
+    baseline_y = dists[0]
 
-        if (left_sides > x_bar).any():
-            right = nonzeros[np.where(nonzeros == left_sides
-                                     [np.where(left_sides
-                                               > x_bar)][0])[0][0]]
-        else:
-            right = nonzeros[-1]
-
-        right += pad
-    else:
-        left, right = nonzeros[0] - pad, nonzeros[-1] + pad
+    # Keep the cropped image within bounds
+    left = max(z[0] - r - pad, min_left)
+    right = min(z[0] + r + pad, max_right)
+    top = max(z[1] - r - pad, min_top)
+    bottom = min(baseline_y+pad, max_bottom)
 
     bounds = [left, right, top, bottom]
     return np.array(np.round(bounds), dtype=int)
@@ -157,7 +146,7 @@ def output_text(time, φ, baseline_width, volume):
           f' Contact angle average (deg): {(ϕ[L]+ϕ[R])/2 : 6.3f} \t'
           f' Baseline width (px): {baseline_width : 4.1f}')
 
-def output_fits(images, fits, baselines, bounds, linear=False):
+def output_fits(images, fits, baselines, bounds, linear=False, savefile=None):
     '''
     Plot the original images with the overlaid fits
 
@@ -171,35 +160,45 @@ def output_fits(images, fits, baselines, bounds, linear=False):
     '''
     num = int(np.ceil(np.sqrt(len(images))))
     fig, axes = plt.subplots(nrows=num, ncols=num)
-    axes = axes.flatten()
-    for j, im in enumerate(images):
-        axes[j].imshow(im, cmap='gray', vmin=0, vmax=1)
-        axes[j].axis('off')
-        axes[j].plot(baselines[j][:, 0], baselines[j][:, 1], 'r-')
+
+    if num > 1:
+        axes = axes.flatten()
+        for j, im in enumerate(images):
+            axes[j].imshow(im, cmap='gray', vmin=0, vmax=1)
+            axes[j].axis('off')
+            axes[j].plot(baselines[j][:, 0], baselines[j][:, 1], 'r-')
+            if linear:
+                axes[j].plot(fits[j][L][:, 0], fits[j][L][:, 1], 'r-')
+                axes[j].plot(fits[j][R][:, 0], fits[j][R][:, 1], 'r-')
+            else:
+                axes[j].plot(fits[j][:, 0], fits[j][:, 1], 'r-')
+            
+
+        for k in range(j, num**2):
+            axes[k].axis('off')
+    elif num == 1:
+        axes.imshow(images[0], cmap='gray', vmin=0, vmax=1)
+        axes.axis('off')
+        axes.plot(baselines[0][:, 0], baselines[0][:, 1], 'r-')
         if linear:
-            axes[j].plot(fits[j][L][:, 0], fits[j][L][:, 1], 'r-')
-            axes[j].plot(fits[j][R][:, 0], fits[j][R][:, 1], 'r-')
+            axes.plot(fits[0][L][:, 0], fits[0][L][:, 1], 'r-')
+            axes.plot(fits[0][R][:, 0], fits[0][R][:, 1], 'r-')
         else:
-            axes[j].plot(fits[j][:, 0], fits[j][:, 1], 'r-')
-        axes[j].set_xlim(bounds[0:2])
-        axes[j].set_ylim(bounds[-1:-3:-1])
+            axes.plot(fits[0][:, 0], fits[0][:, 1], 'r-')
 
-    for k in range(j, num**2):
-        axes[k].axis('off')
-
-    for k in range(j, num**2):
-        axes[k].axis('off')
+    if savefile is not None:
+        plt.savefig(f'{savefile}_allplots.svg', transparent=True)
 
     plt.figure(figsize=(1.5,1.5))
     plt.imshow(images[-1], cmap='gray', vmin=0, vmax=1)
     plt.plot(baselines[-1][:, 0], baselines[-1][:, 1], 'r-')
     plt.axis('off')
     if linear:
-        plt.plot(fits[-1][L][:, 0], fits[j][L][:, 1], 'r-')
-        plt.plot(fits[-1][R][:, 0], fits[j][R][:, 1], 'r-')
+        plt.plot(fits[-1][L][:, 0], fits[-1][L][:, 1], 'r-')
+        plt.plot(fits[-1][R][:, 0], fits[-1][R][:, 1], 'r-')
     else:
-        plt.plot(fits[-1][:, 0], fits[j][:, 1], 'r-')
-    plt.ylim(bounds[-1:-3:-1])
-    plt.xlim(bounds[0:2])
+        plt.plot(fits[-1][:, 0], fits[-1][:, 1], 'r-')
 
+    if savefile is not None:
+        plt.savefig(f'{savefile}_lastplot.svg', transparent=True)
     plt.show()

@@ -11,11 +11,12 @@ import re
 import numpy as np
 
 from skimage import io
+from skimage.transform import hough_line, hough_line_peaks
 
 from time import sleep
 
 from droppy.common import (L, R, T, B, positive_int, positive_float,
-                           calculate_angle)
+                           calculate_angle, positive_int_or_rel)
 from droppy.edgedetection import (sigma_setter, extract_edges)
 from droppy.moviehandling import (extract_grayscale_frames,
                                           output_plots,
@@ -28,8 +29,8 @@ from droppy.circularfits import (generate_circle_vectors, find_intersection,
                                  fit_circle)
 from droppy.bafits import sim_bashforth_adams, fit_bashforth_adams
 
-def analyze_frame(im, time, bounds, baseline_threshold, circ_thresh,
-                  lin_thresh, base_ord, σ, low, high, ε, lim, fit_type):
+def analyze_frame(im, time, bounds, circ_thresh,
+                  lin_thresh, σ, low, high, ε, lim, fit_type):
     '''
     Report the main findings for a single contact angle image
 
@@ -43,12 +44,9 @@ def analyze_frame(im, time, bounds, baseline_threshold, circ_thresh,
     :param im: 2D numpy array of a grayscale image
     :param time: float value of the movie time after burn-in
     :param bounds: edges of the box which crop the image
-    :param baseline_threshold: boundary width within which only baseline
-                               pixels lie
     :param circ_thresh: height above which the baseline does not exist
     :param lin_thresh: distance that preserves a set of linear points on the
                        droplet
-    :param base_ord: polynomial order of the baseline fitting
     :param σ: value of the Gaussian filter used in the Canny algorithm
     :param low: value of the weak pixels used in dual-thresholding
     :param high: value of the strong pixels used in dual-thresholding
@@ -61,19 +59,22 @@ def analyze_frame(im, time, bounds, baseline_threshold, circ_thresh,
              fitted (x,y) points on baseline
     '''
     coords = extract_edges(im, σ=σ, low=low, high=high)
+
+    if bounds is None:
+      bounds = auto_crop(im, σ=σ, low=low, high=high)
+
     crop = crop_points(coords, bounds)
 
-    # Get the baseline from the left and right threshold pixels of the
-    # image (this is important not to crop too far)
-    baseline = {L: crop_points(coords, [bounds[0],
-                                        bounds[0]+baseline_threshold,
-                                        *bounds[2:]]),
-                R: crop_points(coords, [bounds[1]-baseline_threshold,
-                                        bounds[1],
-                                        *bounds[2:]])}
+    cropped_edges = np.zeros((np.max(crop[:,1])+1, np.max(crop[:,0])+1), dtype=bool)
 
-    a = fit_line(np.concatenate((baseline[L],
-                                 baseline[R])), base_ord)[0]
+    for pt in crop:
+      cropped_edges[pt[1], pt[0]] = True
+
+    # Get the baseline from the linear Hough transform
+    accums, angles, dists = hough_line_peaks(*hough_line(cropped_edges), num_peaks=5)
+
+    # Change parameterization from (r, θ) to (m, b) for standard form of line
+    a = [dists[0]/np.sin(angles[0]), -np.cos(angles[0])/np.sin(angles[0])]
 
     f = {i: lambda x, y: x for i in [L, R]}
     f[B] = lambda x, y: y - (np.dot(a, np.power(x, range(len(a)))))
@@ -91,7 +92,7 @@ def analyze_frame(im, time, bounds, baseline_threshold, circ_thresh,
     # Baseline
     x = np.linspace(0, im.shape[1])
     y = np.dot(a, np.power(x, [[po]*len(x)
-                               for po in range(base_ord + 1)]))
+                               for po in range(2)]))
 
     baseline = np.array([x, y]).T
 
@@ -233,28 +234,21 @@ def parse_cmdline(argv=None):
 
     parser = argparse.ArgumentParser(description='Calculate the contact '
                                      'angles '
-                                     'from the provided image or '
+                                     'from the provided image(s) or '
                                      'video file')
-    parser.add_argument('path', help='relative or absolute path to '
-                                     'either image/video file to be '
+    parser.add_argument('path', help='Relative or absolute path to '
+                                     'either image/video file(s) to be '
                                      'analyzed, or a directory in which to '
-                                     'analyze all video/image files',
-                        default='./', nargs='?')
-    parser.add_argument('-b', '--baselineThreshold', type=positive_int,
-                        default=20,
-                        help='Pixel width that determines where '
-                             'baseline lies',
-                        action='store', dest='baseline_threshold')
-    parser.add_argument('-o', '--baselineOrder', type=positive_int, default=1,
-                        help='The polynomial order that will be used in '
-                             'baseline fitting',
-                        action='store', dest='base_ord')
-    parser.add_argument('-c', '--circleThreshold', type=positive_int,
+                                     'analyze all video/image files. If multiple '
+                                     'files are provided, filenames should '
+                                     'be separated by a space.',
+                        default='./', nargs='*')
+    parser.add_argument('-c', '--circleThreshold', type=positive_int_or_rel,
                         default=5,
                         help='Number of pixels above the baseline at which '
                              'points are considered on the droplet',
                         action='store', dest='circ_thresh')
-    parser.add_argument('-l', '--linearThreshold', type=positive_int,
+    parser.add_argument('-l', '--linearThreshold', type=positive_int_or_rel,
                         default=10,
                         action='store', dest='lin_thresh',
                         help='The number of pixels inside the circle which '
@@ -277,7 +271,7 @@ def parse_cmdline(argv=None):
                              'in before beginning analysis')
     parser.add_argument('--fitType', choices=['linear', 'circular',
                                               'bashforth-adams'],
-                        default='linear', type=str, action='store',
+                        default='bashforth-adams', type=str, action='store',
                         dest='fit_type',
                         help='Type of fit to perform to identify the contact '
                              'angles')
@@ -287,18 +281,17 @@ def parse_cmdline(argv=None):
     parser.add_argument('--maxIters', type=positive_int, dest='lim',
                         action='store', default=10,
                         help='Maximum number of circle fitting iterations')
-    parser.add_argument('--verticalTolerance', type=positive_int,
-                        dest='tolerance', action='store', default=8,
-                        help='Pixel error for how bad the fit is before we '
-                             'try fitting x = my + b')
     parser.add_argument('--blockAtEnd', action='store_true',
                         dest='block_at_end',
                         help='Flag to keep plots at the end of the script '
                              'open for user review')
-    parser.add_argument('--autoCrop', action='store_true',
+    parser.add_argument('--saveFigs', action='store', dest='savefile',
+                        default=None, help='Base file path (without '
+                        'extensions where saved figures should go')
+    parser.add_argument('--crop', action='store_false',
                         dest='auto_crop',
-                        help='Flag to automate the cropping of the image '
-                             'using pixel densities')
+                        help='Flag to disable automation of the image cropping '
+                             'using Hough Transforms')
     parser.add_argument('-k', '--keyword', type=str, dest='keyword',
                         action='store', default='', help='Keyword argument '
                         'to match certain files in the directory, will be '
@@ -337,9 +330,6 @@ def main(argv=None):
     Options:
 
     -h, --help               show this help message and exit
-    -b, --baselineThreshold  Pixel width that determines where baseline lies
-    -o, --baselineOrder      The polynomial order that will be used in
-                             baseline fitting
     -c, --circleThreshold    Number of pixels above the baseline at which
                              points are considered on the droplet
     -l, --linearThreshold    The number of pixels inside the circle which can
@@ -356,12 +346,10 @@ def main(argv=None):
                              angles
     --tolerance              Finite difference tolerance
     --maxIters               Maximum number of circle fitting iterations
-    --verticalTolerance      Pixel error for how bad the fit is before we try
-                             fitting x = my + b
     --blockAtEnd             Flag to keep plots at the end of the script open
                              for user review
-    --autoCrop               Flag to automate the cropping of the image using
-                             pixel densities
+    --crop                   Flag to prevent automatic cropping of the image using
+                             Hough transforms
     -k, --keyword            Keyword argument to match certain files in the
                              directory, will be ignored if the path is a
                              single file
@@ -392,33 +380,33 @@ def main(argv=None):
     args = parse_cmdline(argv)
 
     # Set default numerical arguments
-    baseline_threshold = args.baseline_threshold
     lin_thresh = args.lin_thresh
     circ_thresh = args.circ_thresh
     frame_rate = args.frame_rate
-    base_ord = args.base_ord
     σ = args.σ
     ε = args.ε
     video_start_time = args.video_start_time
-    tolerance = args.tolerance
     fit_type = args.fit_type
     lim = args.lim
 
-    if not os.path.exists(args.path):
-        raise FileNotFoundError(f'Couldn\'t find {args.path}, '
-                                'make sure you\'ve spelled it right')
+    for path in args.path:
+      if not os.path.exists(path):
+          raise FileNotFoundError(f'Couldn\'t find {path}, '
+                                  'make sure you\'ve spelled it right')
 
-    if os.path.isfile(args.path):
-        files = [args.path]
-    elif os.path.isdir(args.path):
-        exts = '(avi|mp4|jpg|png|gif)'
-        if not args.redo:
-            files = [args.path+f for f in os.listdir(args.path)
-                     if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)
-                     if not os.path.exists(f'{args.path}results_{f}.csv')]
-        else:
-            files = [args.path+f for f in os.listdir(args.path)
-                     if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)]
+    files = []
+    for path in args.path:
+      if os.path.isfile(path):
+          files += [path]
+      elif os.path.isdir(args.path):
+          exts = '(avi|mp4|jpg|png|gif)'
+          if not args.redo:
+              files += [args.path+f for f in os.listdir(args.path)
+                       if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)
+                       if not os.path.exists(f'{args.path}results_{f}.csv')]
+          else:
+              files += [args.path+f for f in os.listdir(args.path)
+                       if re.match(rf'(?i).*{args.keyword}.*\.{exts}$', f)]
 
     plt.ion()
     for file in files:
@@ -453,7 +441,7 @@ def main(argv=None):
         if not args.auto_crop:
             bounds = get_crop(images[0])
         else:
-            bounds = auto_crop(images[0])
+            bounds = None
 
         # # Create a set of axes to hold the scatter points for all frames in
         # # the videos
@@ -465,19 +453,24 @@ def main(argv=None):
         # image_axes = plt.axes()
         # plt.show()
 
+        if circ_thresh <= 0:
+          _circ_thres = -circ_thresh*images[0].shape[0]
+
+        if lin_thresh <= 0:
+          _lin_thresh *= -lin_thresh*images[0].shape[0]
+
         if args.nproc > 1:
             out = Parallel(n_jobs=args.nproc)(delayed(analyze_frame)(im,
                                                       time[j], bounds,
-                                                      baseline_threshold,
-                                                      circ_thresh, lin_thresh,
-                                                      base_ord, σ, low, high,
+                                                      _circ_thresh, _lin_thresh,
+                                                      σ, low, high,
                                                       ε, lim, fit_type)
                                for j, im in enumerate(images))
         else:
             out = [None]*len(images)
             for j, im in enumerate(images):
-                out[j] = analyze_frame(im, time[j], bounds,baseline_threshold,
-                                       circ_thresh, lin_thresh, base_ord, σ,
+                out[j] = analyze_frame(im, time[j], bounds,
+                                       _circ_thresh, _lin_thresh, σ,
                                        low, high, ε, lim, fit_type)
 
         angles, base_width, volumes, fits, baselines = zip(*out)
@@ -486,7 +479,7 @@ def main(argv=None):
             output_plots(time, angles, base_width, volumes)
 
         output_fits(images, fits, baselines, bounds,
-                    linear=(fit_type=='linear'))
+                    linear=(fit_type=='linear'), savefile=args.savefig)
         output_datafile(file, time, angles, base_width, volumes)
 
         if args.block_at_end:
@@ -496,6 +489,3 @@ def main(argv=None):
             sleep(2)
             plt.close('all')
             plt.ioff()
-
-if __name__ == '__main__':
-    main()

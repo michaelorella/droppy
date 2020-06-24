@@ -39,7 +39,7 @@ def sigma_setter(image, σ=1, bounds=None):
     return σ, low, high
 
 
-def extract_edges(image, σ=1, low=None, high=None):
+def extract_edges(image, σ=1, low=None, high=None, indices=True):
     '''
     Compute the detected edges using the canny algorithm
 
@@ -50,9 +50,9 @@ def extract_edges(image, σ=1, low=None, high=None):
     '''
     edges = feature.canny(image, sigma=σ, low_threshold=low,
                           high_threshold=high)
-    edges = np.array([[x, y] for y, row in enumerate(edges)
-                      for x, val in enumerate(row) if val])
-    return edges
+    if not indices:
+        return edges
+    return np.argwhere(edges.T)
 
 
 class CannyPlugin(plugins.OverlayPlugin):
