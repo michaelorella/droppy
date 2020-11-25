@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Edge Detection &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edge Detection &#8212; DropPy 1.0.0.alpha+3.g6c5ae1b.dirty documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,9 +35,9 @@
             
   <div class="section" id="module-droppy.edgedetection">
 <span id="edge-detection"></span><h1>Edge Detection<a class="headerlink" href="#module-droppy.edgedetection" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="droppy.edgedetection.CannyPlugin">
-<em class="property">class </em><code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">CannyPlugin</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">CannyPlugin</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modification of Canny Plugin provided by Scikit-image to return parameter
 values</p>
 <p>Uses the default values of:</p>
@@ -45,24 +46,24 @@ values</p>
 <li><p>high == 1 (strong pixels are all the way on)</p></li>
 <li><p>low == 1 (weak pixels are all the way on)</p></li>
 </ul>
-<dl class="method">
+<dl class="py method">
 <dt id="droppy.edgedetection.CannyPlugin.add_widget">
-<code class="sig-name descname">add_widget</code><span class="sig-paren">(</span><em class="sig-param">widget</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.add_widget" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_widget</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">widget</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.add_widget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add the new Canny filter widget ot the plugin while registering a new
 callback method to set the widgets attributes so they can be accessed
 later.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="droppy.edgedetection.CannyPlugin.attach">
-<code class="sig-name descname">attach</code><span class="sig-paren">(</span><em class="sig-param">image_viewer</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.attach" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">attach</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_viewer</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.attach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override the attaching of the plugin to the ImageViewer. This utilizes
 nearly identical implementation to <a class="reference external" href="https://github.com/scikit-image/">https://github.com/scikit-image/</a>
 scikit-image/blob/master/skimage/viewer/plugins/canny.py, but changes
 the limits for parameter selection.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="droppy.edgedetection.CannyPlugin.output">
 <code class="sig-name descname">output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.CannyPlugin.output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override the default output behavior so that when the ImageViewer is
@@ -72,9 +73,9 @@ to all future edge detection calls.</p>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.edgedetection.extract_edges">
-<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">extract_edges</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">low=None</em>, <em class="sig-param">high=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.extract_edges" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">extract_edges</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">σ</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indices</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.extract_edges" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the detected edges using the canny algorithm</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -90,9 +91,9 @@ to all future edge detection calls.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.edgedetection.sigma_setter">
-<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">sigma_setter</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">bounds=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.sigma_setter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.edgedetection.</code><code class="sig-name descname">sigma_setter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">σ</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.edgedetection.sigma_setter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show the user the image with the detected edges overlain in a way that
 they can update the edge detection parameters and see the impact on the
 edges.</p>
@@ -170,10 +171,10 @@ edge detection</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Mihael Orella.
+      &copy;2020, Michael Orella.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

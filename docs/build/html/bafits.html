@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Bashfoth-Adams Fitting &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bashfoth-Adams Fitting &#8212; DropPy 1.0.0.alpha+3.g6c5ae1b.dirty documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,9 +35,9 @@
             
   <div class="section" id="module-droppy.bafits">
 <span id="bashfoth-adams-fitting"></span><h1>Bashfoth-Adams Fitting<a class="headerlink" href="#module-droppy.bafits" title="Permalink to this headline">¶</a></h1>
-<dl class="attribute">
+<dl class="py function">
 <dt id="droppy.bafits.bashforth_adams">
-<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">bashforth_adams</code><a class="headerlink" href="#droppy.bafits.bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.bashforth_adams" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rate of change of point on droplet profile with respect to the parametric
 angle ϕ.</p>
 <dl class="field-list simple">
@@ -54,9 +55,9 @@ angle ϕ.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.bafits.fit_bashforth_adams">
-<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">fit_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">a=0.1</em>, <em class="sig-param">b=3</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.fit_bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">fit_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.fit_bashforth_adams" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the best-fit capillary length and curvature at the apex given
 the provided data for the points on the edge of the droplet</p>
 <dl class="field-list simple">
@@ -73,9 +74,9 @@ the provided data for the points on the edge of the droplet</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.bafits.sim_bashforth_adams">
-<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">sim_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param">h</em>, <em class="sig-param">a=1</em>, <em class="sig-param">b=1</em>, <em class="sig-param">all_the_way=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.sim_bashforth_adams" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.bafits.</code><code class="sig-name descname">sim_bashforth_adams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">all_the_way</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.bafits.sim_bashforth_adams" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulates the full profile of the Bashforth-Adams droplet from the apex</p>
 <p>Starts at x = +-1e-5, z = 0 and integrates to z = h along the curve
 defined by the <code class="docutils literal notranslate"><span class="pre">bashforth-adams</span></code> function</p>
@@ -156,10 +157,10 @@ defined by the <code class="docutils literal notranslate"><span class="pre">bash
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Mihael Orella.
+      &copy;2020, Michael Orella.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

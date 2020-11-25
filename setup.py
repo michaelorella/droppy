@@ -25,7 +25,7 @@ setup(name="droppy",
       description=desc.splitlines()[0],
       long_description=desc,
       long_description_content_type='text/markdown',
-      url='https://github.com/michaelorella/contactangles',
+      url='https://github.com/michaelorella/droppy',
       entry_points={'console_scripts':
                     ['droppy=droppy.droppy:main']
                     }

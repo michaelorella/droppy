@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Script Usage &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Script Usage &#8212; DropPy 1.0.0.alpha+3.g6c5ae1b.dirty documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,9 +35,9 @@
             
   <div class="section" id="module-droppy.droppy">
 <span id="script-usage"></span><h1>Script Usage<a class="headerlink" href="#module-droppy.droppy" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.droppy.analyze_frame">
-<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">analyze_frame</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">time</em>, <em class="sig-param">bounds</em>, <em class="sig-param">baseline_threshold</em>, <em class="sig-param">circ_thresh</em>, <em class="sig-param">lin_thresh</em>, <em class="sig-param">base_ord</em>, <em class="sig-param">σ</em>, <em class="sig-param">low</em>, <em class="sig-param">high</em>, <em class="sig-param">ε</em>, <em class="sig-param">lim</em>, <em class="sig-param">fit_type</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.analyze_frame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">analyze_frame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">im</span></em>, <em class="sig-param"><span class="n">time</span></em>, <em class="sig-param"><span class="n">bounds</span></em>, <em class="sig-param"><span class="n">circ_thresh</span></em>, <em class="sig-param"><span class="n">lin_thresh</span></em>, <em class="sig-param"><span class="n">σ</span></em>, <em class="sig-param"><span class="n">low</span></em>, <em class="sig-param"><span class="n">high</span></em>, <em class="sig-param"><span class="n">ε</span></em>, <em class="sig-param"><span class="n">lim</span></em>, <em class="sig-param"><span class="n">fit_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.analyze_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Report the main findings for a single contact angle image</p>
 <p>Takes the provided image and fits it with the specified method [‘linear’,
 ‘circular’, ‘bashforth-adams’] to calculate the droplet contact angle,
@@ -49,12 +50,9 @@ externally for debugging individual frames of a video file.</p>
 <li><p><strong>im</strong> – 2D numpy array of a grayscale image</p></li>
 <li><p><strong>time</strong> – float value of the movie time after burn-in</p></li>
 <li><p><strong>bounds</strong> – edges of the box which crop the image</p></li>
-<li><p><strong>baseline_threshold</strong> – boundary width within which only baseline
-pixels lie</p></li>
 <li><p><strong>circ_thresh</strong> – height above which the baseline does not exist</p></li>
 <li><p><strong>lin_thresh</strong> – distance that preserves a set of linear points on the
 droplet</p></li>
-<li><p><strong>base_ord</strong> – polynomial order of the baseline fitting</p></li>
 <li><p><strong>σ</strong> – value of the Gaussian filter used in the Canny algorithm</p></li>
 <li><p><strong>low</strong> – value of the weak pixels used in dual-thresholding</p></li>
 <li><p><strong>high</strong> – value of the strong pixels used in dual-thresholding</p></li>
@@ -72,9 +70,9 @@ fitted (x,y) points on baseline</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.droppy.main">
-<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param">argv=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.main" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">argv</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main analysis method for DropPy package</p>
 <p>This is the main entry point to the DropPy package for most users, and
 will serve as the most useful call signature. In addition to providing
@@ -95,13 +93,6 @@ script can be found by running:</p>
 <dl class="option-list">
 <dt><kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></dt>
 <dd><p>show this help message and exit</p>
-</dd>
-<dt><kbd><span class="option">-b</span>, <span class="option">--baselineThreshold</span></kbd></dt>
-<dd><p>Pixel width that determines where baseline lies</p>
-</dd>
-<dt><kbd><span class="option">-o</span>, <span class="option">--baselineOrder</span></kbd></dt>
-<dd><p>The polynomial order that will be used in
-baseline fitting</p>
 </dd>
 <dt><kbd><span class="option">-c</span>, <span class="option">--circleThreshold</span></kbd></dt>
 <dd><p>Number of pixels above the baseline at which
@@ -137,17 +128,13 @@ angles</p>
 <dt><kbd><span class="option">--maxIters</span></kbd></dt>
 <dd><p>Maximum number of circle fitting iterations</p>
 </dd>
-<dt><kbd><span class="option">--verticalTolerance</span></kbd></dt>
-<dd><p>Pixel error for how bad the fit is before we try
-fitting x = my + b</p>
-</dd>
 <dt><kbd><span class="option">--blockAtEnd</span></kbd></dt>
 <dd><p>Flag to keep plots at the end of the script open
 for user review</p>
 </dd>
-<dt><kbd><span class="option">--autoCrop</span></kbd></dt>
-<dd><p>Flag to automate the cropping of the image using
-pixel densities</p>
+<dt><kbd><span class="option">--crop</span></kbd></dt>
+<dd><p>Flag to prevent automatic cropping of the image using
+Hough transforms</p>
 </dd>
 <dt><kbd><span class="option">-k</span>, <span class="option">--keyword</span></kbd></dt>
 <dd><p>Keyword argument to match certain files in the
@@ -187,9 +174,9 @@ are exported to a csv with the following naming structure
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.droppy.parse_cmdline">
-<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">parse_cmdline</code><span class="sig-paren">(</span><em class="sig-param">argv=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.parse_cmdline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.droppy.</code><code class="sig-name descname">parse_cmdline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">argv</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.droppy.parse_cmdline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract command line arguments to change program execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,10 +250,10 @@ are exported to a csv with the following naming structure
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Mihael Orella.
+      &copy;2020, Michael Orella.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

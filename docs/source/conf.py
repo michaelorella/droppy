@@ -21,8 +21,8 @@ import droppy
 # -- Project information -----------------------------------------------------
 
 project = 'DropPy'
-copyright = '2020, Mihael Orella'
-author = 'Mihael Orella'
+copyright = '2020, Michael Orella'
+author = 'Michael Orella'
 
 # The full version, including alpha/beta/rc tags
 release = droppy.__version__

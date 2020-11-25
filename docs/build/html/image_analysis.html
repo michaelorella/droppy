@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Image Analysis &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Analysis &#8212; DropPy 1.0.0.alpha+3.g6c5ae1b.dirty documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,15 +35,14 @@
             
   <div class="section" id="module-droppy.imageanalysis">
 <span id="image-analysis"></span><h1>Image Analysis<a class="headerlink" href="#module-droppy.imageanalysis" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.imageanalysis.auto_crop">
-<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">auto_crop</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">pad=50</em>, <em class="sig-param">σ=1</em>, <em class="sig-param">low=None</em>, <em class="sig-param">high=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.auto_crop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">auto_crop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">pad</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">σ</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.auto_crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatically identify where the crop should be placed within the original
 image</p>
-<p>This function makes several assumptions about the image layout to look
-at where the edge density is the highest and center the crop at these
-locations. The bounds of the image are typically identified by looking
-for sharp changes in the edge density as a function of x or y position.</p>
+<p>This function utilizes the skimage circular Hough transfrom implementation
+to identify the most circular object in the image (the droplet), and
+center it within a frame that extends by ‘pad’ to each side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -62,9 +62,9 @@ bounding box</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.imageanalysis.crop_points">
-<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">crop_points</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">bounds</em>, <em class="sig-param">f=None</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.crop_points" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">crop_points</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">bounds</span></em>, <em class="sig-param"><span class="n">f</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.crop_points" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a cropped image with points only lying inside the bounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -81,9 +81,9 @@ bounds</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.imageanalysis.get_crop">
-<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">get_crop</code><span class="sig-paren">(</span><em class="sig-param">image</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.get_crop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">get_crop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.get_crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show the original image to allow the user to crop any extraneous
 information out of the frame.</p>
 <dl class="field-list simple">
@@ -97,9 +97,9 @@ bounding box</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.imageanalysis.output_fits">
-<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_fits</code><span class="sig-paren">(</span><em class="sig-param">images</em>, <em class="sig-param">fits</em>, <em class="sig-param">baselines</em>, <em class="sig-param">bounds</em>, <em class="sig-param">linear=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_fits" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_fits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">images</span></em>, <em class="sig-param"><span class="n">fits</span></em>, <em class="sig-param"><span class="n">baselines</span></em>, <em class="sig-param"><span class="n">bounds</span></em>, <em class="sig-param"><span class="n">linear</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">savefile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_fits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the original images with the overlaid fits</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -118,9 +118,9 @@ locations</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.imageanalysis.output_text">
-<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_text</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">φ</em>, <em class="sig-param">baseline_width</em>, <em class="sig-param">volume</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_text" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.imageanalysis.</code><code class="sig-name descname">output_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time</span></em>, <em class="sig-param"><span class="n">φ</span></em>, <em class="sig-param"><span class="n">baseline_width</span></em>, <em class="sig-param"><span class="n">volume</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.imageanalysis.output_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show the results of the frame analyzed on the command line</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">output_text</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100000</span><span class="p">)</span>
 <span class="go">At time 1.0 Contact angle left (deg): 90 Contact angle right (deg): 90</span>
@@ -205,10 +205,10 @@ of the droplet</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Mihael Orella.
+      &copy;2020, Michael Orella.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

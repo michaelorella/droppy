@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Spherical Cap Approximation &#8212; DropPy 0.3.1.alpha0+1.gf2d95cd.dirty documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spherical Cap Approximation &#8212; DropPy 1.0.0.alpha+3.g6c5ae1b.dirty documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,9 +35,9 @@
             
   <div class="section" id="module-droppy.circularfits">
 <span id="spherical-cap-approximation"></span><h1>Spherical Cap Approximation<a class="headerlink" href="#module-droppy.circularfits" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.circularfits.dist">
-<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">dist</code><span class="sig-paren">(</span><em class="sig-param">param</em>, <em class="sig-param">points</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.dist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">dist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.dist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the total distance from the calculated circle to the points</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -53,9 +54,9 @@ the provided parameters</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.circularfits.find_intersection">
-<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">find_intersection</code><span class="sig-paren">(</span><em class="sig-param">baseline_coeffs</em>, <em class="sig-param">circ_params</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.find_intersection" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">find_intersection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">baseline_coeffs</span></em>, <em class="sig-param"><span class="n">circ_params</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.find_intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the intersection points between the best fit circle and best-fit
 baseline.</p>
 <p>For this we rely on several coordinate transformations, first a
@@ -75,9 +76,9 @@ polynomial</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.circularfits.fit_circle">
-<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">fit_circle</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">width=None</em>, <em class="sig-param">start=False</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.fit_circle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">fit_circle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.fit_circle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the best-fit circle to <code class="docutils literal notranslate"><span class="pre">points</span></code> by minimizing <code class="docutils literal notranslate"><span class="pre">dist</span></code> from
 changing values of the centerpoint and radius</p>
 <dl class="field-list simple">
@@ -95,9 +96,9 @@ radius if True, otherwise radius and centerpoint)</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="droppy.circularfits.generate_circle_vectors">
-<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">generate_circle_vectors</code><span class="sig-paren">(</span><em class="sig-param">intersection</em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.generate_circle_vectors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">droppy.circularfits.</code><code class="sig-name descname">generate_circle_vectors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intersection</span></em><span class="sig-paren">)</span><a class="headerlink" href="#droppy.circularfits.generate_circle_vectors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Using the intersection point with the baseline, compute the vector that
 points tangent to the circle</p>
 <dl class="field-list simple">
@@ -172,10 +173,10 @@ points tangent to the circle</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Mihael Orella.
+      &copy;2020, Michael Orella.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
