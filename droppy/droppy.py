@@ -246,14 +246,18 @@ def parse_cmdline(argv=None):
     parser.add_argument('-c', '--circleThreshold', type=positive_int_or_rel,
                         default=5,
                         help='Number of pixels above the baseline at which '
-                             'points are considered on the droplet',
+                             'points are considered on the droplet. To define'
+                             ' the threshold relative to the image size, the'
+                             ' value should be a float between -1 and 0.',
                         action='store', dest='circ_thresh')
     parser.add_argument('-l', '--linearThreshold', type=positive_int_or_rel,
                         default=10,
                         action='store', dest='lin_thresh',
                         help='The number of pixels inside the circle which '
                              'can be considered to be linear and should be '
-                             'fit to obtain angles')
+                             'fit to obtain angles. To define'
+                             ' the threshold relative to the image size, the'
+                             ' value should be a float between -1 and 0.')
     parser.add_argument('-f', '--frequency', type=positive_float, default=1,
                         action='store', dest='frame_rate',
                         help='Frequency at which to analyze images from a '
@@ -303,6 +307,9 @@ def parse_cmdline(argv=None):
                         help='Number of processes to use for the parallel '
                         'computation. If nproc == 1, the frames are analyzed '
                         'in serial.', default=1)
+    parser.add_argument('--savefig', action='store', dest='savefig',
+                        help='Absolute or relative path to the image file'
+                        'used to store the output figure.', default=None)
 
     args = parser.parse_args(argv)
 
@@ -443,22 +450,18 @@ def main(argv=None):
         else:
             bounds = None
 
-        # # Create a set of axes to hold the scatter points for all frames in
-        # # the videos
-        # plt.figure()
-        # scatter_axis = plt.axes()
-        # scatter_axis.invert_yaxis()
-
-        # plt.figure(figsize=(5, 5))
-        # image_axes = plt.axes()
-        # plt.show()
-
+        # Define the threshold values in absolute pixel terms
         if circ_thresh <= 0:
-          _circ_thres = -circ_thresh*images[0].shape[0]
+          _circ_thresh = -circ_thresh*images[0].shape[0]
+        else:
+          _circ_thresh = circ_thresh
 
         if lin_thresh <= 0:
-          _lin_thresh *= -lin_thresh*images[0].shape[0]
+          _lin_thresh = -lin_thresh*images[0].shape[0]
+        else:
+          _lin_thresh = lin_thresh
 
+        # Run the analysis on each of the frames to be processed
         if args.nproc > 1:
             out = Parallel(n_jobs=args.nproc)(delayed(analyze_frame)(im,
                                                       time[j], bounds,
